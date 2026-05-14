@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+.mypy_cache/
+
+# Environments
+.env
+.venv/
+venv/
+env/
+
+# Large model artifacts
+*.pth
+*.pt
+*.onnx
+*.qnn
+*.dlc
+*.tflite
+/models/
+/release_models/
+/checkpoint/
+/checkpoints/
+
+# Dataset and cache artifacts
+*.mp4
+*.avi
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.npy
+*.npz
+/kinetics_cache/
+datasets/**
+!datasets/
+!datasets/update_qevd_sup_meta.py
+!datasets/QEVD_sup/
+!datasets/QEVD_sup/README.md
+!datasets/QEVD_sup/meta/
+!datasets/QEVD_sup/meta/task_map.txt
+
+# Third-party checkouts and generated outputs
+mmaction/mmaction2/
+/export_assets/
+/output/
+/torchvision_backup/
+* copy.py
+
+# Keep only our MMAction2 integration files
+!mmaction/
+!mmaction/QEVD_config/
+!mmaction/QEVD_config/*.py
+!mmaction/QEVD_datasets/
+!mmaction/QEVD_datasets/*.py
