@@ -1,10 +1,10 @@
 from typing import Tuple
 
-import torchvision_backup
+import torchvision
 from torch import Tensor
 
 
-class KineticsWithVideoId(torchvision_backup.datasets.Kinetics):
+class KineticsWithVideoId(torchvision.datasets.Kinetics):
     def __getitem__(self, idx: int) -> Tuple[Tensor, Tensor, int]:
         video, audio, info, video_idx = self.video_clips.get_clip(idx)
         label = self.samples[video_idx][1]

@@ -1,11 +1,12 @@
 import argparse
 from pathlib import Path
+from typing import Dict, List
 
 
 VIDEO_EXTENSIONS = {'.avi', '.mp4'}
 
 
-def parse_task_map(task_map_path: Path) -> dict[str, int]:
+def parse_task_map(task_map_path: Path) -> Dict[str, int]:
     class_to_label = {}
     with task_map_path.open('r', encoding='utf-8') as f:
         for line_no, line in enumerate(f, start=1):
@@ -29,7 +30,7 @@ def parse_task_map(task_map_path: Path) -> dict[str, int]:
     return class_to_label
 
 
-def build_split_meta(dataset_root: Path, split: str, class_to_label: dict[str, int]) -> list[str]:
+def build_split_meta(dataset_root: Path, split: str, class_to_label: Dict[str, int]) -> List[str]:
     split_root = dataset_root / split
     if not split_root.is_dir():
         raise FileNotFoundError(f'Split directory not found: {split_root}')
@@ -61,7 +62,7 @@ def build_split_meta(dataset_root: Path, split: str, class_to_label: dict[str, i
     return lines
 
 
-def write_lines(path: Path, lines: list[str]) -> None:
+def write_lines(path: Path, lines: List[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = path.with_name(f'.{path.name}.tmp')
     tmp_path.write_text('\n'.join(lines) + '\n', encoding='utf-8')

@@ -1,5 +1,51 @@
 # LPCV Track2 EfficientAI
 
+## Perforated Hackathon Project
+
+Two scripts were added to apply PerforatedAI dendritic optimization to the distilled student model.
+
+**`references/video_classification/train_distill_r2plus1d_from_slowfast_mmaction_perforated.py`**
+Distillation training script with PAI integration. Loads a Kinetics-400 pretrained student model, fine-tunes it via knowledge distillation from the SlowFast-R101 teacher, and applies PerforatedAI dendrite optimization during training.
+
+```bash
+./ENV/bin/python -m pdb ./references/video_classification/train_distill_r2plus1d_from_slowfast_mmaction.py \
+  --data-path ./Dataset/QEVD_sup_full \
+  --teacher-config ./mmaction/mmaction2/configs/recognition/slowfast/slowfast_r101_16x4_QEVD_sup.py \
+  --teacher-checkpoint ./models/slowfast_r101_16x4_QEVD_sup.pth \
+  --student-weights KINETICS400_V1 \
+  --clip-len 16 --student-clip-len 16 \
+  --teacher-train-resize-size 256 256 --teacher-train-crop-size 224 224 \
+  --student-train-resize-size 128 171 --student-train-crop-size 112 112 \
+  --student-val-resize-size 128 171 --student-val-crop-size 112 112 \
+  --distill-alpha 0.5 --distill-temp 2.0 \
+  --cache-dataset --epochs 30 --batch-size 32 --lr 0.005 \
+  --output-dir ./checkpoint --amp --print-freq 1000
+```
+
+**`references/video_classification/benchmark_inference.py`**
+Standalone inference benchmark that evaluates and compares the baseline model (trained weights before dendrites were added) against the PAI-optimized model (with dendrites). Reports parameter count, throughput, and accuracy for each.
+
+```bash
+./ENV/bin/python -m pdb references/video_classification/benchmark_inference.py
+```
+
+**Results:**
+
+```
+==============================================================
+  COMPARISON SUMMARY
+==============================================================
+  Model                          Params    Clips/s      Acc@1
+  ---------------------- -------------- ---------- ----------
+  Baseline Model             31,347,321       65.2    94.490%
+  Perforated Model           31,441,989       66.0    95.058%
+==============================================================
+```
+
+The perforated model reduces top-1 error for video classification by ~0.57 percentage points (a ~10% relative error reduction) with a parameter increase of only 94k (~0.3%). The throughput difference is within GPU noise and alternates between runs — there is no meaningful speed cost.
+
+---
+
 This repository contains our LPCV Track 2 video classification solution. The
 workflow has three stages:
 

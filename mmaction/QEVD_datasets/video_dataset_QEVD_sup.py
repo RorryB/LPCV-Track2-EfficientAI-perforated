@@ -4,11 +4,11 @@ import os.path as osp
 from typing import Callable, List, Optional, Tuple, Union
 
 import torch
-import torchvision_backup
+import torchvision
 from mmengine.fileio import exists, list_from_file
 from torch import Tensor
 from torch import nn
-from torchvision_backup.transforms import transforms
+from torchvision.transforms import transforms
 
 from mmaction.registry import DATASETS
 from mmaction.structures import ActionDataSample
@@ -75,7 +75,7 @@ class VideoClassificationPresetEval:
         return self.transforms(x)
 
 
-class KineticsWithVideoId(torchvision_backup.datasets.Kinetics):
+class KineticsWithVideoId(torchvision.datasets.Kinetics):
     def __getitem__(self, idx: int) -> Tuple[Tensor, Tensor, int, int]:
         video, audio, info, video_idx = self.video_clips.get_clip(idx)
         label = self.samples[video_idx][1]
