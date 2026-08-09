@@ -29,6 +29,8 @@ Standalone inference benchmark that evaluates and compares the baseline model (t
 ./ENV/bin/python -m pdb references/video_classification/benchmark_inference.py
 ```
 
+The trained models and inference dataset can be found [here](https://drive.google.com/drive/u/1/folders/1bCamFCXcOWJbiwMVEwvakfqBFPQvxKM2).  For the full training dataset see download instructions in the original README below the ARM Hackathon section.
+
 **Results:**
 
 ```
@@ -37,8 +39,8 @@ Standalone inference benchmark that evaluates and compares the baseline model (t
 ==============================================================
   Model                          Params    Clips/s      Acc@1
   ---------------------- -------------- ---------- ----------
-  Baseline Model             31,347,321       65.2    94.490%
-  Perforated Model           31,441,989       66.0    95.058%
+  Baseline Model             31,347,321       2.261    94.490%
+  Perforated Model           31,441,989       2.265    95.058%
 ==============================================================
 ```
 
@@ -179,6 +181,9 @@ workflow has three stages:
 1. Train a SlowFast-R101 teacher with MMAction2.
 2. Distill the teacher into a lightweight TorchVision video model.
 3. Export the distilled model for Qualcomm AI Hub deployment.
+
+
+# Original README below with additional instructions
 
 ## Released Assets
 
