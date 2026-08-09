@@ -174,7 +174,7 @@ python references/video_classification/train_distill_r2plus1d_from_slowfast_mmac
 - The benchmark script has defaults configured for `./Dataset/QEVD_sup_full` and `./r2plus1d_dendritic`
 - For multi-line commands, use backtick (`` ` ``) at the end of each line for continuation
 
----
+# Original README below with additional instructions
 
 This repository contains our LPCV Track 2 video classification solution. The
 workflow has three stages:
@@ -184,7 +184,6 @@ workflow has three stages:
 3. Export the distilled model for Qualcomm AI Hub deployment.
 
 
-# Original README below with additional instructions
 
 ## Released Assets
 
