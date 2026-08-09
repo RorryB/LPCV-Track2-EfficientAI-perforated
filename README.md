@@ -44,7 +44,7 @@ The trained models and inference dataset can be found [here](https://drive.googl
 ==============================================================
 ```
 
-The perforated model reduces top-1 error for video classification by ~0.57 percentage points (a ~10% relative error reduction) with a parameter increase of only 94k (~0.3%). The throughput difference is within GPU noise and alternates between runs — there is no meaningful speed cost.
+The perforated model reduces top-1 error for video classification by ~0.57 percentage points (a ~10% relative error reduction) with a parameter increase of only 94k (~0.3%). The throughput difference is well within the run-to-run noise you'd expect on a laptop.
 
 ### Perforated Windows ARM Setup
 
@@ -52,6 +52,7 @@ The perforated model reduces top-1 error for video classification by ~0.57 perce
 - Windows 11 ARM64
 - Python 3.14+ (tested with 3.14.6)
 - PowerShell with script execution enabled
+- ARM Snapdragon CPU
 
 **1. Enable PowerShell Script Execution**
 
