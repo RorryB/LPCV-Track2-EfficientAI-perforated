@@ -22,6 +22,7 @@ import os
 import sys
 import time
 import warnings
+from functools import partial
 
 import torch
 import torch.utils.data
@@ -47,6 +48,26 @@ def build_base_model(num_classes, weights=None):
     model = torchvision.models.video.r2plus1d_18(weights=weights)
     model.fc = nn.Linear(model.fc.in_features, num_classes)
     return model
+
+
+# ---------------------------------------------------------------------------
+# Collate functions (module-level for Python 3.14+ pickle compatibility)
+# ---------------------------------------------------------------------------
+
+def _tchw_to_cthw(video):
+    """Convert TCHW to CTHW format if needed."""
+    if video.shape[0] == 3:
+        return video
+    return video.permute(1, 0, 2, 3).contiguous()
+
+
+def collate_val_fn(batch, transform):
+    """Collate function for validation loader."""
+    videos, _, targets, video_idx = zip(*batch)
+    student_v = torch.stack([_tchw_to_cthw(transform(v)) for v in videos])
+    targets = default_collate(targets)
+    video_idx = default_collate(video_idx)
+    return student_v, targets, video_idx
 
 
 
@@ -93,26 +114,18 @@ def build_val_loader(args, num_classes):
         resize_size=(128, 171),
     )
 
-    def _tchw_to_cthw(video):
-        if video.shape[0] == 3:
-            return video
-        return video.permute(1, 0, 2, 3).contiguous()
-
-    def collate_val(batch):
-        videos, _, targets, video_idx = zip(*batch)
-        student_v = torch.stack([_tchw_to_cthw(student_eval_tf(v)) for v in videos])
-        targets = default_collate(targets)
-        video_idx = default_collate(video_idx)
-        return student_v, targets, video_idx
-
     val_sampler = UniformClipSampler(dataset_val.video_clips, 1)
+    
+    # Use partial to pass transform to collate function
+    collate_fn = partial(collate_val_fn, transform=student_eval_tf)
+    
     loader = torch.utils.data.DataLoader(
         dataset_val,
         batch_size=args.batch_size,
         sampler=val_sampler,
         num_workers=args.workers,
         pin_memory=True,
-        collate_fn=collate_val,
+        collate_fn=collate_fn,
     )
     return loader, dataset_val
 
@@ -139,7 +152,8 @@ def run_eval(model, loader, dataset_val, device, label):
 
     total_clips = 0
     total_batches = len(loader)
-    torch.cuda.synchronize(device)
+    if device.type == 'cuda':
+        torch.cuda.synchronize(device)
     t0 = time.perf_counter()
 
     with torch.inference_mode():
@@ -158,10 +172,11 @@ def run_eval(model, loader, dataset_val, device, label):
             total_clips += student_v.size(0)
             elapsed_so_far = time.perf_counter() - t0
             cps = total_clips / max(elapsed_so_far, 1e-6)
-            print(f"\r  [{batch_idx+1}/{total_batches}]  clips: {total_clips}  clips/s: {cps:.1f}  elapsed: {elapsed_so_far:.1f}s", end="", flush=True)
+            print(f"\r  [{batch_idx+1}/{total_batches}]  clips: {total_clips}  clips/s: {cps:.3f}  elapsed: {elapsed_so_far:.1f}s", end="", flush=True)
     print()
 
-    torch.cuda.synchronize(device)
+    if device.type == 'cuda':
+        torch.cuda.synchronize(device)
     elapsed = time.perf_counter() - t0
 
     _, top1_pred = agg_preds.topk(1, dim=1)
@@ -172,7 +187,7 @@ def run_eval(model, loader, dataset_val, device, label):
     clips_per_sec = total_clips / elapsed
     params = sum(p.numel() for p in model.parameters())
 
-    print(f"  Clips/sec:     {clips_per_sec:.1f}")
+    print(f"  Clips/sec:     {clips_per_sec:.3f}")
     print(f"  Total time:    {elapsed:.1f}s  ({total_clips} clips)")
     print(f"  Video Acc@1:   {video_acc1:.3f}%")
 
@@ -231,7 +246,7 @@ def main(args):
     print(f"  {'Model':<22} {'Params':>14} {'Clips/s':>10} {'Acc@1':>10}")
     print(f"  {'-'*22} {'-'*14} {'-'*10} {'-'*10}")
     for r in results:
-        print(f"  {r['label']:<22} {r['params']:>14,} {r['clips_per_sec']:>10.1f} {r['video_acc1']:>9.3f}%")
+        print(f"  {r['label']:<22} {r['params']:>14,} {r['clips_per_sec']:>10.3f} {r['video_acc1']:>9.3f}%")
     print(f"{'='*W}\n")
 
 
@@ -242,7 +257,7 @@ def get_args_parser():
                         help="PAI save folder containing best_model.pt, best_model_pai.pt, beforeSwitch_0.pt etc.")
     parser.add_argument("--device", default="cuda", type=str)
     parser.add_argument("-b", "--batch-size", default=32, type=int)
-    parser.add_argument("-j", "--workers", default=10, type=int)
+    parser.add_argument("-j", "--workers", default=4, type=int)
     parser.add_argument("--cache-dataset", default=True, action="store_true")
     parser.add_argument("--cache-dir", default="./kinetics_cache", type=str)
     return parser
