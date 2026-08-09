@@ -44,7 +44,7 @@ The trained models and inference dataset can be found [here](https://drive.googl
 ==============================================================
 ```
 
-The perforated model reduces top-1 error for video classification by ~0.57 percentage points (a ~10% relative error reduction) with a parameter increase of only 94k (~0.3%). The throughput difference negligible, well within the run-to-run noise you'd expect on a laptop running the same model multiple times.
+The perforated model reduces top-1 error for video classification by ~0.57 percentage points (a ~10% relative error reduction) with a parameter increase of only 94k (~0.3%). The throughput difference negligible, well within the run-to-run noise you'd expect on a laptop running the same model multiple times.  To note - our scores a lower than the original repository because we only use the baseline data and not the additional supplementary data.
 
 ### Perforated Windows ARM Setup
 
